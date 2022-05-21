@@ -59,5 +59,9 @@ const setEmployeePassword = (
 
 const removeEmploye = (uuid) => axios.delete("/employees/" + uuid).then(r => r.data);
 
+const getClient = (uuid) => axios.get("/clients/" + uuid).then(r => r.data);
+
+const changeClientNewsletter = (uuid) => axios.put("/clients/newsletter/" + uuid).then(r => r.data);
+
 export default {getEmployees, getEmployee, getRedactors, createEmployee, updateEmployee, removeEmploye,
-    getRoles, setEmployeePassword};
+    getRoles, setEmployeePassword, getClient, changeClientNewsletter};

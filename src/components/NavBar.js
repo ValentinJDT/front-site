@@ -21,6 +21,7 @@ const NavBar = (props) => {
     if(context.isAuthenticated) {
         payload = jwtDecode(localStorage.getItem("token"));
         adminRoute = context.grantedRoutes.filter(route => route.home)[0];
+        console.log(payload)
     }
 
     const disconnect = () => {
@@ -46,8 +47,7 @@ const NavBar = (props) => {
                                 <NavDropdown title={payload["firstname"] + " " + payload["lastname"]} id="basic-nav-dropdown">
                                     <Link className={"dropdown-item"} to={"/personal-account"}>Mon compte</Link>
 
-
-                                    {context.power < 0 && (
+                                    {context.power < 1 && (
                                         <Link className={"dropdown-item"} to={"/personal-comments"}>Mes commentaires</Link>
                                     ) || (
                                         <Link className={"dropdown-item"} to={adminRoute.path}>{adminRoute.name}</Link>

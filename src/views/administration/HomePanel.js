@@ -29,21 +29,20 @@ const HomePanel = () => {
 
 
     const access = roles.map(role => {
-
         const _grantedRoutes = context.grantedRoutes.filter(route => !route.home && !route.hide && route.power === role.power).map(route => {
             if(context.power >= route.power) {
                 return (<span key={uuid()}><Link className="btn btn-outline-primary my-2" style={{width: "100%"}}
                                                  to={route.path}>{route.name}</Link><br/></span>);
             } else {
-                //
                 return <span key={uuid()} className={"btn btn-outline-secondary my-2 disabled"}>{route.name}</span>;
             }
         });
 
+        console.log(role);
+
         return (
             <ul className="list-group m-1" style={{width: "25%"}}>
                 <li className="list-group-item list-group-item-secondary">{role.nom} ({role.power})</li>
-
                 <li className="list-group-item">{_grantedRoutes}</li>
             </ul>
         );

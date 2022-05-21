@@ -27,7 +27,6 @@ const Products = () => {
 
             setProducts(data);
             setLoaded(true);
-
         } catch (e) {
             console.log(e.response);
         }
@@ -48,7 +47,8 @@ const Products = () => {
     }, []);
 
 
-    const _products = products.map((product) => (
+    const _products = products.map((product) => {
+        return (
         <Link key={product.idProduit} to={"/product/" + product.idProduit} className={"product-link mb-3"}>
             <div className="card rounded-0" style={{maxWidth: "540px"}}>
                 <div className="row g-0">
@@ -57,7 +57,7 @@ const Products = () => {
                             <h5 className="card-title">{product.nom}</h5>
 
                             <p className="card-text">
-                                Catégorie : {product.categorie.nom}
+                                Catégorie : {product.idCategorie.nom}
                             </p>
 
                             <div className="card-text">
@@ -80,7 +80,7 @@ const Products = () => {
                 </div>
             </div>
         </Link>
-    ));
+    )});
 
 
     const _categories = categories.map(category => (
@@ -113,7 +113,7 @@ const Products = () => {
                 <div className={"mt-3"}>
                     <select className="form-select form-select-sm d-inline" style={{width: "auto"}} onChange={(e) => {
                         setLoaded(false);
-                        fetchProducts(e.target.value)
+                        fetchProducts(e.target.value);
                     }} defaultValue={"all"}>
                         <option value={"all"}>Tous les produits</option>
                         {_categories}

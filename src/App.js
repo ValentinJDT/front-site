@@ -45,8 +45,6 @@ function App() {
             const payload = jwtDecode(token);
             setPower(payload.power);
 
-            console.log("Update", payload["power"]);
-
         } else if(power !== 0) {
             setPower(0);
             console.log("Reset")

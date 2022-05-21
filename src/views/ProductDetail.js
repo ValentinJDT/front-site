@@ -1,71 +1,181 @@
-import {Helmet} from "react-helmet-async";
-import React, {useEffect, useState} from "react";
-import {Link} from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import ProductAPI from "../services/ProductAPI";
-import parse from 'html-react-parser';
-import coffee from '../images/default-coffee.jpg';
+import parse from "html-react-parser";
+import coffee from "../images/default-coffee.jpg";
 import showdown from "showdown";
 
 const ProductDetail = (props) => {
+  const title = "Fiche détails";
 
-    const title = "Fiche détails";
+  const idProduct = props.match.params.product;
+  const [isLoaded, setLoaded] = useState(false);
+  const [product, setProduct] = useState([]);
+  const [declinaisons, setDeclinaisons] = useState([]);
+  const [size, setSize] = useState(1);
+  const [tva, setTva] = useState(0);
 
-    const idProduct = props.match.params.product;
-    const [product, setProduct] = useState([]);
-    const [tva, setTva] = useState(0);
-
-    const fetchProduct = async () => {
-        try {
-            const data = await ProductAPI.getProduct(idProduct);
-            setProduct(data);
-            setTva(data["tva"]["pourcentage"]);
-        } catch(e) {
-            console.log(e);
-        }
+  const fetchProduct = async () => {
+    try {
+      const data = await ProductAPI.getProduct(idProduct);
+      setProduct(data);
+      setTva(data["tva"]["pourcentage"]);
+    } catch (e) {
+      console.log(e);
     }
+  };
 
-    const converter = new showdown.Converter();
+  const fetchDeclinaison = async () => {
+    try {
+      const data = await ProductAPI.getDeclinaisonByProduct(idProduct);
+      setDeclinaisons(data.map((value) => value.idDeclinaison));
+      setLoaded(true);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
-    useEffect(() => fetchProduct(), []);
+  const converter = new showdown.Converter();
 
-    return (
-        <>
-            <div>
-                <Helmet>
-                    <title>{title} | Afterworks</title>
-                </Helmet>
+  useEffect(() => {
+    fetchDeclinaison();
+    fetchProduct();
+  }, []);
+
+  useEffect(() => {
+    console.log(declinaisons);
+  }, [declinaisons]);
+
+  return (
+    <>
+      <div>
+        <Helmet>
+          <title>{title} | Afterworks</title>
+        </Helmet>
+      </div>
+
+      <>
+        <nav aria-label="breadcrumb">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item">
+              <Link to={"/"}>Accueil</Link>
+            </li>
+            <li className="breadcrumb-item">
+              <Link to={"/products"}>Produits</Link>
+            </li>
+            <li className="breadcrumb-item active" aria-current="page">
+              {product.nom}
+            </li>
+          </ol>
+        </nav>
+
+        <h4 className={"m-4"}>
+          {title} : {product.nom}
+        </h4>
+
+        <div className="row mt-5" style={{ width: "100%" }}>
+          {(!product.nom && (
+            <div className="text-center">
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
             </div>
-
+          )) || (
             <>
-                <nav aria-label="breadcrumb">
-                    <ol className="breadcrumb">
-                        <li className="breadcrumb-item"><Link to={"/"}>Accueil</Link></li>
-                        <li className="breadcrumb-item"><Link to={"/products"}>Produits</Link></li>
-                        <li className="breadcrumb-item active" aria-current="page">{product.nom}</li>
-                    </ol>
-                </nav>
-
-                <h4 className={"m-4"}>{title} : {product.nom}</h4>
-
-                <div className="row mt-5" style={{width: "100%"}}>
-                    <div className="col-5 m-3">
-                        <img style={{maxWidth: "100%"}} src={product.image || coffee} />
-                    </div>
-                    <div className="col m-3">
-                        <div className="row">
-                            Description : <br/>
-                            {parse(converter.makeHtml(product.description))}
-                        </div>
-
-                        <div className="row mt-4">
-                            Prix : <br/>
-                            {product.prixUnitaire*(1 + (tva/100))} €
-                        </div>
-                    </div>
+              <div className="col-5 m-3">
+                <img
+                  style={{ maxWidth: "100%" }}
+                  src={product.image || coffee}
+                  alt="product"
+                />
+              </div>
+              <div className="col m-3">
+                <div className="row">
+                  <h5>Description : </h5>
+                  {product.description && parse(converter.makeHtml("" + product.description)) || "Aucune description disponible"}
                 </div>
+
+                <div className="row mt-3">
+                  <h5>Prix :</h5>
+                  {product.prixUnitaire * (1 + tva / 100)} €
+                </div>
+
+                {(declinaisons.length && isLoaded && (
+                  <form className="row mt-4">
+                    <h5>Les disponibilités :</h5>
+                    {declinaisons.map((value, key) => (
+                      <div className="form-check" key={key}>
+                        <input
+                          type="radio"
+                          value={value.idDeclinaison}
+                          name="declinaison"
+                        />{" "}
+                        {value.nom}
+                      </div>
+                    ))}
+
+                    <div>
+                      <div
+                        className="input-group my-3"
+                        style={{ width: "18%" }}
+                      >
+                        <button
+                          className="btn btn-outline-secondary"
+                          type="button"
+                          onClick={(e) => {
+                            if (size - 1 > 0) setSize(size - 1);
+                          }}
+                        >
+                          -
+                        </button>
+                        <input
+                          type="text"
+                          className="form-control text-center"
+                          value={size}
+                          onChange={(e) => {
+                            const value = Number(e.target.value);
+                            if (!Number.isNaN(value) && value <= 50) {
+                              setSize(value);
+                            }
+                          }}
+                        />
+                        <button
+                          className="btn btn-outline-secondary"
+                          type="button"
+                          onClick={(e) => {
+                            if (size + 1 <= 50) setSize(size + 1);
+                          }}
+                        >
+                          +
+                        </button>
+                      </div>
+                      <button type="button" class="btn btn-outline-secondary">
+                        Ajouter au panier
+                      </button>
+                    </div>
+                  </form>
+                )) ||
+                  (!declinaisons.length && !isLoaded && (
+                    <div className="text-center">
+                      <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                  )) || (
+                    <div>
+                      <span className="badge bg-danger text-bg-danger">
+                        Non disponible à l'achat
+                      </span>
+                    </div>
+                  )}
+              </div>
             </>
-        </>
-    );
-}
+          )}
+        </div>
+      </>
+    </>
+  );
+};
 
 export default ProductDetail;

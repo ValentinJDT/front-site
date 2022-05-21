@@ -1,25 +1,91 @@
-import {Helmet} from "react-helmet-async";
-import {Button, Card} from "react-bootstrap";
+import { Helmet } from "react-helmet-async";
+import { Button, Card } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import RedacAPI from "../services/RedacAPI";
 
 const Home = (props) => {
+  const [articles, setArticles] = useState([]);
+  const [article, setArticle] = useState({});
+  const [isLoaded, setLoaded] = useState(false);
+
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const articles = await RedacAPI.getArticles();
+        setArticle(articles[getRandomInt(articles.length)]);
+        setLoaded(true);
+      } catch (e) {
+        console.log(e);
+      }
+    })();
+  }, []);
+
+  const date = () => {
+    const tempDate = new Date(article.dateCreation);
     return (
-        <>
-            <Helmet>
-                <title>Accueil | Afterworks</title>
-            </Helmet>
-            <Card style={{ width: '18rem' }}>
-                <Card.Img src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22286%22%20height%3D%22180%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20286%20180%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_17db32ec048%20text%20%7B%20fill%3A%23999%3Bfont-weight%3Anormal%3Bfont-family%3Avar(--bs-font-sans-serif)%2C%20monospace%3Bfont-size%3A14pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_17db32ec048%22%3E%3Crect%20width%3D%22286%22%20height%3D%22180%22%20fill%3D%22%23373940%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22108.5390625%22%20y%3D%2297.5%22%3E286x180%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E" />
-                <Card.Body>
-                    <Card.Title>Card Title</Card.Title>
-                    <Card.Text>
-                        Some quick example text to build on the card title and make up the bulk of
-                        the card's content.
-                    </Card.Text>
-                    <Button variant="primary">Go somewhere</Button>
-                </Card.Body>
-            </Card>
-        </>
+      tempDate.getDate() +
+      "/" +
+      tempDate.getMonth() +
+      1 +
+      "/" +
+      tempDate.getFullYear() +
+      " à " +
+      tempDate.getHours() +
+      "h" +
+      (tempDate.getMinutes() > 9
+        ? tempDate.getMinutes()
+        : "0" + tempDate.getMinutes())
     );
-}
+  };
+
+  return (
+    <>
+      <Helmet>
+        <title>Accueil | Afterworks</title>
+      </Helmet>
+      <>
+        {(!isLoaded && (
+          <div className="text-center">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        )) || (
+          <>
+            <h1 className="text-center">Afterwork</h1>
+
+            <h3 className="mt-5 mb-2">
+               Vous avez peut-être manqué :
+            </h3>
+            <div className={"row p-3"} style={{ maxWidth: "100%" }}>
+              <div className={"col"}>
+                <ul className="list-group">
+                  <li className="list-group-item">
+                    <h5>
+                      <strong>{article.titre}</strong>
+                    </h5>
+                    {article.contenu}
+                  </li>
+                  <li className="list-group-item">
+                    De{" "}
+                    <strong>
+                      {article.idEmploye.prenom} {article.idEmploye.nom}{" "}
+                    </strong>{" "}
+                    <br />
+                    Le <strong>{date()}</strong>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </>
+        )}
+      </>
+    </>
+  );
+};
 
 export default Home;
