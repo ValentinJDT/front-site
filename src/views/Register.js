@@ -9,7 +9,8 @@ const Register = (props) => {
   const [canLookPass, setLookPass] = useState(false);
   const [canLookConfirmPass, setLookConfirmPass] = useState(false);
 
-  const [error, setError] = useState(false);
+  const [isLoaded, setLoaded] = useState(true);
+  const [error, setError] = useState();
 
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
@@ -25,10 +26,29 @@ const Register = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    setError(null);
+
     (async () => {
       try {
-        if(password !== confirmPassword)
-          throw new Error("Passwords doesn't match");
+        if (password !== confirmPassword) {
+          setError(
+            <div class="alert alert-danger mt-3" role="alert">
+              Erreur : Les mots de passe ne correspondent pas
+            </div>
+          );
+          return;
+        }
+
+        if (!password || !confirmPassword) {
+          setError(
+            <div class="alert alert-danger mt-3" role="alert">
+              Erreur : Veuillez compléter correctement les champs
+            </div>
+          );
+          return;
+        }
+
+        setLoaded(false);
 
         const data = await UserAPI.createClient(
           email,
@@ -44,8 +64,24 @@ const Register = (props) => {
 
         props.history.replace("/login");
       } catch (e) {
-        setError(true);
+        console.log(e.toJSON());
+
+        if (e.toJSON().status == 401) {
+          setError(
+            <div class="alert alert-danger mt-3" role="alert">
+              Erreur : L'identifiant existe déjà
+            </div>
+          );
+        } else {
+          setError(
+            <div class="alert alert-danger mt-3" role="alert">
+              Erreur : Une erreur est survenu lors de la création du compte
+            </div>
+          );
+        }
       }
+
+      setLoaded(true);
     })();
   };
 
@@ -252,9 +288,19 @@ const Register = (props) => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary">
-            S'enregistrer
-          </button>
+          {!!error && error}
+
+          {(!isLoaded && (
+            <div className="text-center mt-3">
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          )) || (
+            <button type="submit" className="btn btn-primary">
+              S'enregistrer
+            </button>
+          )}
         </form>
       </div>
       <div className={"text-center"}>

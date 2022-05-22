@@ -7,28 +7,56 @@ import AuthAPI from "../services/AuthAPI";
 const MyAccount = () => {
   const title = "Mon compte";
 
+  const [isLoaded, setLoaded] = useState(true);
+  const [error, setError] = useState(null);
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [mail, setMail] = useState("");
   const [newsletter, setNewsletter] = useState(false);
 
   const handleChangePassword = async () => {
+    setError(null);
     try {
-      if (password !== confirmPassword)
-        throw new Error("Les mots de passe ne correspondent pas");
+      if (password !== confirmPassword) {
+        setError(
+          <div class="alert alert-danger mt-3" role="alert">
+            Les mots de passe ne correspondent pas
+          </div>
+        );
+        return;
+      }
+
+      if (!password || !confirmPassword) {
+        setError(
+          <div class="alert alert-danger mt-3" role="alert">
+            Veuillez compléter correctement les champs
+          </div>
+        );
+        return;
+      }
+
+      setLoaded(false);
 
       const payload = AuthAPI.getPayload();
       const uuid = payload["uuid"];
 
-      if(payload["roles"].includes("ROLE_EMPLOYEE")) {
+      if (payload["roles"].includes("ROLE_EMPLOYEE")) {
         await UserAPI.setEmployePassword(uuid, password);
       } else {
         await UserAPI.setClientPassword(uuid, password);
       }
 
+      setError(
+        <div class="alert alert-success mt-3" role="alert">
+          Le mot de passe a été changé avec succès
+        </div>
+      );
     } catch (e) {
       console.log(e);
     }
+
+    setLoaded(true);
   };
 
   const changeNewsletter = () => {
@@ -80,6 +108,7 @@ const MyAccount = () => {
           placeholder={"Mot de passe"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
 
         <label htmlFor="inputConfirmPassword" className="form-label mt-4">
@@ -91,15 +120,26 @@ const MyAccount = () => {
           placeholder={"Confirmation de mot de passe"}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
+          required
         />
 
-        <button
-          type="button"
-          className="btn btn-outline-secondary my-4 me-3"
-          onClick={handleChangePassword}
-        >
-          Enregistrer
-        </button>
+        {!!error && error}
+
+        {(!isLoaded && (
+          <div className="text-center mt-3">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        )) || (
+          <button
+            type="button"
+            className={"btn btn-outline-secondary me-3 " + (!error ? "mt-4" : "")}
+            onClick={handleChangePassword}
+          >
+            Enregistrer
+          </button>
+        )}
       </div>
 
       {!AuthAPI.getPayload()["roles"].includes("ROLE_EMPLOYEE") && (
