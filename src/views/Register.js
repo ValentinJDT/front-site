@@ -64,7 +64,7 @@ const Register = (props) => {
 
         props.history.replace("/login");
       } catch (e) {
-        console.log(e.toJSON());
+        console.log(e);
 
         if (e.toJSON().status == 401) {
           setError(
