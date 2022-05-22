@@ -12,6 +12,10 @@ import Products from "./views/Products";
 import ProductDetail from "./views/ProductDetail";
 import Connection from "./views/Connection";
 import Register from "./views/Register";
+import ArticlesPublic from "./views/Articles";
+import ArticleDetailPublic from "./views/ArticleDetail";
+
+
 import CreateArticle from "./views/administration/articles/CreateArticle";
 import CreateRubric from "./views/administration/articles/CreateRubric";
 import Dev from "./views/administration/dev/dev";
@@ -54,24 +58,24 @@ function App() {
 
     const grantedRoutes = [
         {
-            name: "Panel de modification des rédacteurs",
-            path: "/panel/redactors",
+            name: "Panel de modification des employés",
+            path: "/panel/employee",
             power: 10,
             component: Redactors,
             hide: false,
             home: false
         },
         {
-            name: "Créer un rédacteur",
-            path: "/panel/create-redactor",
+            name: "Créer un employé",
+            path: "/panel/create-employe",
             power: 10,
             component: CreateRedactor,
             hide: false,
             home: false
         },
         {
-            name: "Modifier un rédacteur",
-            path: "/panel/edit-redactor/:redactor",
+            name: "Modifier un employé",
+            path: "/panel/edit-employe/:redactor",
             power: 10,
             component: EditRedactor,
             hide: true,
@@ -117,7 +121,7 @@ function App() {
             hide: false,
             home: false
         },
-        {
+        /*{
             name: "Créer un produit",
             path: "/panel/product",
             power: 10,
@@ -132,7 +136,7 @@ function App() {
             component: CreateRubric,
             hide: false,
             home: false
-        },
+        },*/
         {
             name: "Panel administratif",
             path: "/panel/home",
@@ -146,7 +150,7 @@ function App() {
             path: "/panel/dev",
             power: 0,
             component: Dev,
-            hide: false,
+            hide: true,
             home: false
         }
     ];
@@ -168,13 +172,17 @@ function App() {
                 <AuthContext.Provider value={contextValues}>
                     <BrowserRouter>
                         <NavBarWithRouter/>
-                        <div className={"container pt-5"} style={{minHeight: "calc(100vh - 210px)"}}>
+                        <div className={"container pt-5 mb-5"} style={{minHeight: "calc(100vh - 255px)"}}>
                             <Switch>
                                 <Route path={"/"} exact component={Home}/>
                                 <Route path={"/products"} exact component={Products}/>
                                 <Route path={"/product/:product"} exact component={ProductDetail}/>
+
+                                <Route path={"/rubric/:rubric"} exact component={ArticlesPublic}/>
+                                <Route path={"/article/:article"} exact component={ArticleDetailPublic}/>
                                 <Route path={"/login"} exact component={Connection}/>
                                 <Route path={"/register"} exact component={Register}/>
+
                                 <AuthenticatedRoute path={"/personal-account"} component={MyAccount}/>
 
                                 {

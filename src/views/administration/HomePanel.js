@@ -37,9 +37,7 @@ const HomePanel = () => {
                 return <span key={uuid()} className={"btn btn-outline-secondary my-2 disabled"}>{route.name}</span>;
             }
         });
-
-        console.log(role);
-
+        
         return (
             <ul className="list-group m-1" style={{width: "25%"}}>
                 <li className="list-group-item list-group-item-secondary">{role.nom} ({role.power})</li>

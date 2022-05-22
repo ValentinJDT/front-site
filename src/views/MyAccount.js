@@ -20,7 +20,12 @@ const MyAccount = () => {
       const payload = AuthAPI.getPayload();
       const uuid = payload["uuid"];
 
-      await UserAPI.setEmployeePassword(uuid, password);
+      if(payload["roles"].includes("ROLE_EMPLOYEE")) {
+        await UserAPI.setEmployePassword(uuid, password);
+      } else {
+        await UserAPI.setClientPassword(uuid, password);
+      }
+
     } catch (e) {
       console.log(e);
     }

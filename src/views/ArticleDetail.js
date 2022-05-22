@@ -1,40 +1,40 @@
-import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import RedacAPI from "../services/RedacAPI";
+import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import parse from "html-react-parser";
 import showdown from "showdown";
-import cafe from "../images/cafe-home-2.jpg";
 
-const Home = (props) => {
+const ArticleDetail = (props) => {
+  const title = "Détail d'un article";
+
+  const idArticle = props.match.params.article;
+
   const [article, setArticle] = useState({});
-  const [isLoaded, setLoaded] = useState(false);
+  const [rubric, setRubric] = useState({});
 
   const converter = new showdown.Converter();
 
   useEffect(() => {
     (async () => {
       try {
-        const articles = await RedacAPI.getArticles();
-        const last = articles.sort(
-          (a, b) =>
-            new Date(a.dateCreation).getTime() -
-            new Date(b.dateCreation).getTime()
-        )[articles.length - 1];
-        setArticle(last);
-        setLoaded(true);
+        if (Number.isNaN(idArticle)) throw new Error("404 error");
+        const data = await RedacAPI.getArticle(idArticle);
+        setArticle(data);
+        console.log(data);
       } catch (e) {
         console.log(e);
       }
     })();
-  }, []);
+  }, [idArticle]);
 
   const date = () => {
     const tempDate = new Date(article.dateCreation);
     return (
       tempDate.getDate() +
       "/" +
-      (tempDate.getMonth() +
-      1) +
+      tempDate.getMonth() +
+      1 +
       "/" +
       tempDate.getFullYear() +
       " à " +
@@ -49,22 +49,34 @@ const Home = (props) => {
   return (
     <>
       <Helmet>
-        <title>Accueil | Afterworks</title>
+        <title>{title} | Afterworks</title>
       </Helmet>
       <>
-        <div>
-          <h1 className="text-center mt-2 mb-5">Afterwork</h1>
-        </div>
+        <nav aria-label="breadcrumb">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item">
+              <Link to={"/"}>Accueil</Link>
+            </li>
+            <li className="breadcrumb-item active" aria-current="page">
+              Rubrique
+            </li>
+            <li className="breadcrumb-item" aria-current="page">
+              {(Object.keys(article).length && (
+                <Link to={"/rubric/" + article.idRubrique.idRubrique}>
+                  {article.idRubrique.titre}
+                </Link>
+              )) ||
+                "Chargement..."}
+            </li>
+            <li className="breadcrumb-item active" aria-current="page">
+              {(Object.keys(article).length && article.titre) || ""}
+            </li>
+          </ol>
+        </nav>
 
-        <div className="my-5">
-          <img src={cafe} alt="coffee" className="mw-100" />
-        </div>
+        <h4 className={"m-3"}>{title}</h4>
 
-        <h3 className="mt-5 mb-4">
-          <span className="badge badge-success bg-success">Nouveauté</span> Vous
-          avez peut-être manqué notre dernier article !
-        </h3>
-        {(!isLoaded && (
+        {(!Object.keys(article).length && (
           <div className="text-center">
             <div className="spinner-border" role="status">
               <span className="visually-hidden">Loading...</span>
@@ -75,7 +87,7 @@ const Home = (props) => {
             <div className={"row p-3"} style={{ maxWidth: "100%" }}>
               <div className={"col"}>
                 <ul className="list-group">
-                  <li className="list-group-item">
+                  <li className="list-group-item" style={{ minHeight: "50%" }}>
                     <h4 className="text-center">
                       <strong>{article.titre}</strong>
                     </h4>
@@ -88,8 +100,6 @@ const Home = (props) => {
                     </strong>
                     <br />
                     Le <strong>{date()}</strong>
-                    <br />
-                    Rubrique <strong>{article.idRubrique.titre}</strong>
                   </li>
                 </ul>
               </div>
@@ -101,4 +111,4 @@ const Home = (props) => {
   );
 };
 
-export default Home;
+export default ArticleDetail;

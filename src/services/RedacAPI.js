@@ -44,7 +44,16 @@ const getRubrics = () => axios.get("/rubrics", { params: { ignore_no_content: fa
 
 const getRubricsWhoHasArticle = () => axios.get("/rubrics", { params: { ignore_no_content: true } }).then(r => r.data);
 
+const createComment = (product_dec, title, content) => axios.post("/comments", {
+    product_dec: product_dec,
+    title: title,
+    content: content
+}).then(r => r.data);
+
+const getCommentsByProduct = (idProduit) => axios.get("/comments/product/" + idProduit).then(r => r.data);
+
 export default {
     createArticle, saveArticle, removeArticle, getArticle, getArticles,
-    createRubric, saveRubric, removeRubric, getRubric, getRubrics, getRubricsWhoHasArticle
+    createRubric, saveRubric, removeRubric, getRubric, getRubrics, getRubricsWhoHasArticle,
+    createComment, getCommentsByProduct
 };
